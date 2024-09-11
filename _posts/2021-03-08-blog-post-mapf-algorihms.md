@@ -16,11 +16,11 @@ The problem of multi-agent pathfinding could be formalised as solving a stochast
     G = \langle \mathcal{I}, \mathcal{S}, \{\mathcal{A}\}_{i=1}^n, P,  \rho_0, \{R^i\}_{i=1}^n, \{\mathcal{O}^i\}_{i=1}^n, \{O^i\}_{i=1}^n, \gamma \rangle,
 \end{align}$$ where $$\mathcal{I}$$ is a finite set of $$n$$ agents, $$\mathcal{S}$$ is a finite set of the environment states, $$\mathbf{A} = \prod_{i \in \mathcal{I}} \mathcal{A}^i$$ --- a finite set of joint actions, $$\mathbf{O} = \prod_{i \in \mathcal{I}} \mathcal{O}^i$$  --- a joint observation space,  $$O^i: \mathcal{S} \times \mathbf{A} \times \mathcal{O}^i \rightarrow \Delta(\mathcal{O}^i)$$ --- an observation function of the $$i^{\text{th}}$$ agent, $$\rho_0 \in \Delta(\mathcal{S})$$ --- initial state distribution, $$\gamma \in (0, 1)$$ is a discount factor.
 
-The game proceeds as follows. Starting from an initial state $$s_0 \sim \rho$$, at time $$t$$, an agent $$i \in \mathcal{I}$$ receives a private observation $$o_t^i$$ governed by the observation function, $$O^i(o_t^i | s_{t+1}, a_t)$$, and chooses an action $$a^i_t \in \mathcal{A}^i$$ that gets simultaneously executed with all other agents.  Given the state $$s_t$$ and agents' joint action $$\mathbf{a}_t = \{a^i_t\}$$, the environment transitions to the next state according to the state transition function $$P(s_{t+1}|s_t, \mathbf{a}_t): \ \mathcal{S} \times \mathcal{A} \times S \rightarrow \Delta(S)$$ and gets reward according to the reward function  $$r_t^i = R^i(s_{t+1}, \mathbf{a}_t, s_{t}): \mathcal{S} \times \mathbf{A} \times \mathcal{S} \rightarrow \mathbb{R}$$. Each agent aims to find a behavioural policy $$\pi^i(a^i_t|h^i_t) \in \Pi^i: \mathcal{T} \rightarrow \Delta(\mathcal{A}^i)$$ conditioned on action-observation history $$h_t = (s_0, \mathbf{o}_0, \mathbf{a}_0, s_1,  \mathbf{o}_1, \mathbf{a}_1, \ldots, s_t, \mathbf{o}_t) \in \mathcal{T} = (\mathcal{S} \times \mathbf{A} \times \mathbf{O})^*$$ that can guide the agent to take sequential actions such that the discounted cumulative reward of the joint policy $$\pi = (\pi^i, \pi^{-i})$$ is maximised:
+The game proceeds as follows. Starting from an initial state $$s_0 \sim \rho$$, at time $$t$$, an agent $$i \in \mathcal{I}$$ receives a private observation $$o_t^i$$ governed by the observation function, $$O^i(o_t^i \vert s_{t+1}, a_t)$$, and chooses an action $$a^i_t \in \mathcal{A}^i$$ that gets simultaneously executed with all other agents.  Given the state $$s_t$$ and agents' joint action $$\mathbf{a}_t = \{a^i_t\}$$, the environment transitions to the next state according to the state transition function $$P(s_{t+1}\vert s_t, \mathbf{a}_t): \ \mathcal{S} \times \mathcal{A} \times S \rightarrow \Delta(S)$$ and gets reward according to the reward function  $$r_t^i = R^i(s_{t+1}, \mathbf{a}_t, s_{t}): \mathcal{S} \times \mathbf{A} \times \mathcal{S} \rightarrow \mathbb{R}$$. Each agent aims to find a behavioural policy $$\pi^i(a^i_t\vert h^i_t) \in \Pi^i: \mathcal{T} \rightarrow \Delta(\mathcal{A}^i)$$ conditioned on action-observation history $$h_t = (s_0, \mathbf{o}_0, \mathbf{a}_0, s_1,  \mathbf{o}_1, \mathbf{a}_1, \ldots, s_t, \mathbf{o}_t) \in \mathcal{T} = (\mathcal{S} \times \mathbf{A} \times \mathbf{O})^*$$ that can guide the agent to take sequential actions such that the discounted cumulative reward of the joint policy $$\pi = (\pi^i, \pi^{-i})$$ is maximised:
 
 $$
 \begin{align}
-    \pi^i = \arg\max_{\pi^i}\mathbb{E}_{\pi, P} \left[ \sum_{t=0}^{T_{\text{max}}} \gamma^t r_{t+1} | s_0 \sim \rho \right]
+    \pi^i = \arg\max_{\pi^i}\mathbb{E}_{\pi, P} \left[ \sum_{t=0}^{T_{\text{max}}} \gamma^t r_{t+1} \vert  s_0 \sim \rho \right]
 \end{align}
 $$
 
@@ -87,18 +87,18 @@ $$
 \begin{align*}
     \text{RSSM} \begin{cases}
     \text{Recurrent model:} & h^i_t = f_\phi (h^i_{t-1}, \mathbf{z}_{t-1}, \mathbf{a}_{t-1}), \\
-    \text{Representation model:} & z^i_t \sim q_\phi(z^i_t|h^i_t, o^i_t) , \\
-    \text{Transition predictor:} & \hat{z}^i_t  \sim p_\phi(\hat{z}^i_t|h^i_t), \\
+    \text{Representation model:} & z^i_t \sim q_\phi(z^i_t\vert h^i_t, o^i_t) , \\
+    \text{Transition predictor:} & \hat{z}^i_t  \sim p_\phi(\hat{z}^i_t\vert h^i_t), \\
     \end{cases}
 \end{align*}
 $$
 $$
 \begin{align*}
     \text{Auxiliary components}\begin{cases}        
-    \text{Observation predictor:} & \hat{o}^i_t  \sim p_\phi(\hat{o}^i_t|h^i_t, z^i_t), \\
-    \text{Action predictor:} & \hat{a}^i_{t-1}  \sim p_\phi(\hat{a}^i_{t-1}|h^i_t, z^i_t), \\ 
-    \text{Reward predictor:} & \hat{r}^i_t  \sim p_\phi(\hat{r}^i_t|h^i_t, z^i_t), \\
-    \text{Discount predictor:} & \hat{\gamma}^i_t  \sim p_\phi(\hat{\gamma}^i_t|h^i_t, z^i_t)
+    \text{Observation predictor:} & \hat{o}^i_t  \sim p_\phi(\hat{o}^i_t\vert h^i_t, z^i_t), \\
+    \text{Action predictor:} & \hat{a}^i_{t-1}  \sim p_\phi(\hat{a}^i_{t-1}\vert h^i_t, z^i_t), \\ 
+    \text{Reward predictor:} & \hat{r}^i_t  \sim p_\phi(\hat{r}^i_t\vert h^i_t, z^i_t), \\
+    \text{Discount predictor:} & \hat{\gamma}^i_t  \sim p_\phi(\hat{\gamma}^i_t\vert h^i_t, z^i_t)
     \end{cases}
 \end{align*}
 $$
@@ -108,7 +108,7 @@ Loss for every agent $$i$$ function to achieve the objective is defined in the f
 $$
 \begin{align*}
     \begin{split}
-    \max_\phi\mathbb{E}_{q_\phi(z_{1:T}|o_{1:T}, a_{0:T})} -\log p_\phi (o_t|h_t, z_t) - \log p_\phi (r_t|h_t, z_t)  \\ -\log p_\phi (\gamma_t|h_t, z_t) -\overbrace{\log p_\phi (a_{t-1}|h_t, z_t)}^{\text{information loss}} + \beta \cdot KL\left[ q_\phi(z_t|h_t, x_t) ||  p_\phi(z_t|h_t) \right] 
+    \max_\phi\mathbb{E}_{q_\phi(z_{1:T}\vert o_{1:T}, a_{0:T})} -\log p_\phi (o_t\vert h_t, z_t) - \log p_\phi (r_t\vert h_t, z_t)  \\ -\log p_\phi (\gamma_t\vert h_t, z_t) -\overbrace{\log p_\phi (a_{t-1}\vert h_t, z_t)}^{\text{information loss}} + \beta \cdot KL\left[ q_\phi(z_t\vert h_t, x_t) \vert \vert   p_\phi(z_t\vert h_t) \right] 
     \end{split}
 \end{align*}
 $$
@@ -119,7 +119,7 @@ over increasing posterior entropy, so that the prior better approximates the agg
 The model then used for planning to learn a policy from trajectories imagined in the compact latent space. These trajectories start from posterior states computed during model training --- the authors call the approach “imagination MDP”. The actor and critic neural networks are supposed to learn behavioural policy from “imagined” trajectories of representations generated by the world model:
 $$
 \begin{align}
-    \text{Actor: } a_t \sim \pi_\theta(a_t|[z_t, h_t]), && \text{Critic: }  v_\psi(R_t|[z_t, h_t]).
+    \text{Actor: } a_t \sim \pi_\theta(a_t\vert [z_t, h_t]), && \text{Critic: }  v_\psi(R_t\vert [z_t, h_t]).
 \end{align}
 $$
 
@@ -134,7 +134,7 @@ $$
 also, there was added additional component to the loss function to maximise mutual information between the latent state and the previous action of the agent (action prediction):
 $$
 \begin{align*}
-    \mathcal{L}_{\text{info}} = - I((h_t^i, z_t^i), a_t^i) \approx - \log p_\phi (a^i_{t-1} | h_t^i, z_t^i)
+    \mathcal{L}_{\text{info}} = - I((h_t^i, z_t^i), a_t^i) \approx - \log p_\phi (a^i_{t-1} \vert  h_t^i, z_t^i)
 \end{align*}
 $$
 
@@ -146,7 +146,7 @@ $$
 | [ArXiv](https://arxiv.org/abs/1511.08779)      | [GitHub](https://github.com/oxwhirl/pymarl)      |
 
 
-Denoting $$Q$$-function of the POSG as $$Q^\pi(s, \mathbf{a}) = \mathbb{E}_{\pi, P} \left[ \sum_{t=0}^{T_{\text{max}}} \gamma^t r_{t+1} | s_0 = s, \mathbf{a}_t \sim \pi(\cdot|s)\right]$$, the goal is to compute the optimal $$Q^*$$-value: $$Q^*(s, \mathbb{a}) = \max_\pi Q^\pi(s, \mathbf{a})$$. This can we recursively rewritten, using a Bellman equation: $$Q^*(s, \mathbf{a}) = \mathbb{E}_{\pi, P} \left[ r + \gamma \max_{\mathbf{a'}} Q^\pi (s, \mathbf{a'})\right]$$. Deep $$Q$$-value network approach this problem of *value iteration* as regression of parameters $$\theta$:
+Denoting $$Q$$-function of the POSG as $$Q^\pi(s, \mathbf{a}) = \mathbb{E}_{\pi, P} \left[ \sum_{t=0}^{T_{\text{max}}} \gamma^t r_{t+1} \vert  s_0 = s, \mathbf{a}_t \sim \pi(\cdot\vert s)\right]$$, the goal is to compute the optimal $$Q^*$$-value: $$Q^*(s, \mathbb{a}) = \max_\pi Q^\pi(s, \mathbf{a})$$. This can we recursively rewritten, using a Bellman equation: $$Q^*(s, \mathbf{a}) = \mathbb{E}_{\pi, P} \left[ r + \gamma \max_{\mathbf{a'}} Q^\pi (s, \mathbf{a'})\right]$$. Deep $$Q$$-value network approach this problem of *value iteration* as regression of parameters $$\theta$:
 
 $$
 \begin{align*}
