@@ -146,7 +146,7 @@ $$
 | [ArXiv](https://arxiv.org/abs/1511.08779)      | [GitHub](https://github.com/oxwhirl/pymarl)      |
 
 
-Denoting $$Q$$-function of the POSG as $$Q^\pi(s, \mathbf{a}) = \mathbb{E}_{\pi, P} \left[ \sum_{t=0}^{T_{\text{max}}} \gamma^t r_{t+1} \vert  s_0 = s, \mathbf{a}_t \sim \pi(\cdot\vert s)\right]$$, the goal is to compute the optimal $$Q^*$$-value: $$Q^*(s, \mathbb{a}) = \max_\pi Q^\pi(s, \mathbf{a})$$. This can we recursively rewritten, using a Bellman equation: $$Q^*(s, \mathbf{a}) = \mathbb{E}_{\pi, P} \left[ r + \gamma \max_{\mathbf{a'}} Q^\pi (s, \mathbf{a'})\right]$$. Deep $$Q$$-value network approach this problem of *value iteration* as regression of parameters $$\theta$:
+Denoting $$Q$$-function of the POSG as $$Q^\pi(s, \mathbf{a}) = \mathbb{E}_{\pi, P} \left[ \sum_{t=0}^{T_{\text{max}}} \gamma^t r_{t+1} \vert  s_0 = s, \mathbf{a}_t \sim \pi(\cdot\vert s)\right]$$, the goal is to compute the optimal $$Q^*$$-value: $$Q^*(s, \mathbb{a}) = \max_\pi Q^\pi(s, \mathbf{a})$$. This can we recursively rewritten, using a Bellman equation: $$Q^*(s, \mathbf{a}) = \mathbb{E}_{\pi, P} \left[ r + \gamma \max_{\mathbf{a'}} Q^\pi (s, \mathbf{a'})\right]$$. Deep $$Q$$-value network approach this problem of *value iteration* as regression of parameters $$\theta$$:
 
 $$
 \begin{align*}
@@ -157,9 +157,9 @@ $$
 \end{align*}
 $$
 
-where $$\theta^-$$ are parameters of separate target networks that are periodically copied from $$\theta$$ and kept constant for a number of iterations . This is model-free, off-policy algorithm that has quite a lot of [modifications](https://arxiv.org/abs/1710.02298). To ensure the exploration, actions are picked with decaying $$\varepsilon$-greedy strategy.
+where $$\theta^-$$ are parameters of separate target networks that are periodically copied from $$\theta$$ and kept constant for a number of iterations . This is model-free, off-policy algorithm that has quite a lot of [modifications](https://arxiv.org/abs/1710.02298). To ensure the exploration, actions are picked with decaying $$\varepsilon$$-greedy strategy.
 
-IQL is the simplest extention of a method that consists of using the autonomous [$Q$-learning algorithm](https://arxiv.org/abs/1312.5602) for each agent in the environment ($\forall i \in \mathcal{I} \rightarrow Q^{\theta^i}(s, a^i)$), thereby using the environment as the sole source of interaction between agents.
+IQL is the simplest extention of a method that consists of using the autonomous [$$Q$$-learning algorithm](https://arxiv.org/abs/1312.5602) for each agent in the environment ($$\forall i \in \mathcal{I} \rightarrow Q^{\theta^i}(s, a^i)$$), thereby using the environment as the sole source of interaction between agents.
 
 <!-- 
 <details> 
@@ -172,7 +172,7 @@ IQL is the simplest extention of a method that consists of using the autonomous 
 |------------|-------------|
 | [ArXiv](https://arxiv.org/abs/1706.05296)      | [GitHub](https://github.com/Louiii/ValueDecomposition)      |
 
-The authors introduce a novel learned additive value-decomposition approach over individual agents. Implicitly, the value decomposition network aims to learn an optimal linear value decomposition from the team reward signal, by back-propagating the total $$Q$$ gradient through deep neural networks representing the individual component value functions.
+The authors introduce a novel learned additive value-decomposition approach over individual agents. Implicitly, the value decomposition network aims to learn an optimal linear value decomposition from the team reward signal, by back-propagating the total $$Q$$-gradient through deep neural networks representing the individual component value functions.
 
 $$
 \begin{align*}
@@ -293,4 +293,4 @@ This method approaches lifelong MAPF (LMAPF) problem. The framework is called Ro
 1. it allows an agent to be assigned a sequence of goal locations within the same Windowed MAPF episode, and 
 2. collisions need to be resolved only for the first $$w$$ timesteps (time horizon $$w \geq t$$ is user-specified)
 
-The benefit of this decomposition is two-fold. First, it keeps the agents continually engaged, avoiding idle time, and thus increasing throughput. Second, it generates pliable plans that adapt to continually arriving new goal locations. In fact, resolving collisions in the entire time horizon (i.e., $$w=\infty$) is often unnecessary since the paths of the agents can change as new goal locations arrive.
+The benefit of this decomposition is two-fold. First, it keeps the agents continually engaged, avoiding idle time, and thus increasing throughput. Second, it generates pliable plans that adapt to continually arriving new goal locations. In fact, resolving collisions in the entire time horizon (i.e., $$w=\infty$$) is often unnecessary since the paths of the agents can change as new goal locations arrive.
