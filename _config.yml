@@ -22,9 +22,9 @@ theme: "minima"
 
 rss: rss
 
-kramdown:
-  syntax_highlighter_opts:
-    disable: true
+# kramdown:
+#   syntax_highlighter_opts:
+#     disable: true
     
 plugins:
   - jekyll-feed
@@ -40,3 +40,7 @@ defaults:
       type: post
     values:
       tags: Other
+
+markdown: kramdown
+kramdown:
+    math_engine: katex
