@@ -60,8 +60,8 @@ $$
 
 ## MAPF approaches
 
-| Algorithm                                | Decentralised | Partial Observability | Fully Integrated into POGEMA | Supports MAPF | Supports LifeLong MAPF | No Global Obstacles Map | No Communication | Parameter Sharing | Decentralised Learning | Model-Based | No Imitation Learning |
-|------------------------------------------|---------------|--------------------|------------------|---------------|---------------------|-------------------------|----------------|-----------------|----------------------|-------------|---------------------|
+| Algorithm                                | Decentralised | Partial Observability Supports MAPF | Supports LifeLong MAPF | No Communication | Parameter Sharing | Decentralised Learning | Model-Based | No Imitation Learning |
+|------------------------------------------|---------------|-----------------------------------|---------------------|-------------------------|-----------------|----------------------|-------------|---------------------|
 | [MAMBA](#mamba)          | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;                    | &#x2713;         | &#x2713;                   |
 | [QPLEX](#qplex)               | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;                    | &#x2717;         | &#x2713;                   |
 | [IQL](#iql)                  | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2713;                    | &#x2717;         | &#x2713;                   |
