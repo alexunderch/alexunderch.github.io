@@ -59,20 +59,20 @@ $$
 
 ## MAPF approaches
 
-| Algorithm                                | Decentralised | Partial Observability Supports MAPF | Supports LifeLong MAPF | No Communication | Parameter Sharing | Decentralised Learning | Model-Based | No Imitation Learning |
-|------------------------------------------|---------------|-----------------------------------|---------------------|-------------------------|-----------------|----------------------|-------------|---------------------|
-| [MAMBA](#mamba)          | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;                    | &#x2713;         | &#x2713;                   |
-| [QPLEX](#qplex)               | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;                    | &#x2717;         | &#x2713;                   |
-| [IQL](#iql)                  | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2713;                    | &#x2717;         | &#x2713;                   |
-| [VDN](#vdn)              | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;                    | &#x2717;         | &#x2713;                   |
-| [QMIX](#qmix)          | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;                    | &#x2717;         | &#x2713;                   |
-| [Follower](#follower)        | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2717;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2713;                    | &#x2717;         | &#x2713;                   |
-| [MATS-LP](#mats-lp) | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2717;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2713;                    | &#x2713;         | &#x2713;                   |
-| [Switcher](#switcher)       | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2717;           | &#x2713;                    | &#x2713;                     | &#x2713;              | &#x2713;               | &#x2713;                    | &#x2717;         | &#x2713;                   |
-| [SCRIMP](#scrimp)             | &#x2713;           | &#x2713;                   | &#x2717;                          | &#x2713;           | &#x2717;                    | &#x2717;                     | &#x2717;              | &#x2713;               | &#x2717;                    | &#x2717;         | &#x2717;                   |
-| [DCC](#dcc)                | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2717;                    | &#x2717;                     | &#x2717;              | &#x2713;               | &#x2717;                    | &#x2717;         | &#x2717;                   |
-| [LaCAM](#lacam)            | &#x2717;           | &#x2717;                   | &#x2717;                          | &#x2713;           | &#x2717;                    | &#x2717;                     | -                | -                 | -                      | -           | -                     |
-| [RHCR](#rhcr)                   | &#x2717;           | &#x2717;                   | &#x2717;                          | &#x2717;           | &#x2713;                    | &#x2717;                     | -                | -                 | -                      | -           | -                     |
+| Algorithm                                | Decentralised in training/planning phase | Partial Observability Supports MAPF | Supports LifeLong MAPF | No Communication | Parameter Sharing | Model-Based 
+|------------------------------------------|---------------|-----------------------------------|---------------------|-------------------------|-----------------|-------------|
+| [MAMBA](#mamba)          | &#x2717;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2713;         | 
+| [QPLEX](#qplex)               | &#x2717;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;         | 
+| [IQL](#iql)                  | &#x2717;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;         | 
+| [VDN](#vdn)              | &#x2717;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;         | 
+| [QMIX](#qmix)          | &#x2717;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;         | 
+| [Follower](#follower)        | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2717;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2717;         | 
+| [MATS-LP](#mats-lp) | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2717;           | &#x2713;                    | &#x2717;                     | &#x2713;              | &#x2713;               | &#x2713;         | 
+| [Switcher](#switcher)       | &#x2713;           | &#x2713;                   | &#x2713;                          | &#x2717;           | &#x2713;                    | &#x2713;                     | &#x2713;              | &#x2713;               | &#x2717;         | 
+| [SCRIMP](#scrimp)             | &#x2717;           | &#x2713;                   | &#x2717;                          | &#x2713;           | &#x2717;                    | &#x2717;                     | &#x2717;              | &#x2713;               | &#x2717;         | 
+| [DCC](#dcc)                | &#x2717;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2717;                    | &#x2717;                     | &#x2717;              | &#x2713;               | &#x2717;         |
+| [DHC](#dhc)                | &#x2717;           | &#x2713;                   | &#x2713;                          | &#x2713;           | &#x2717;                    | &#x2717;                     | &#x2717;              | &#x2713;               | &#x2717;         | 
+| [RHCR](#rhcr)                   | &#x2717;           | &#x2717;                   | &#x2717;                          | &#x2717;           | &#x2717;                     | -                |
 
 
 
@@ -221,15 +221,34 @@ The overall architecture of QPLEX consists of two main components:
 1. an Individual Action-Value Function for each agent
 2. a Duplex Dueling component that composes individual action-value functions into a joint action-value function under the advantage-based IGM constraint
 
+
+### Learnable MAPF methods
+
+Generally, MAPF approaches can be distinguished by access level of a method:
+1. centralised approaches: each learning agent has the access to the others' locations and goals
+2. decentralised approaches: each learning agent has the access to only own goal locations but can only observe other agents' locations if only they present in his field of view usually described as a neighbourhood of the agent's location.
+
+There have been done a lot of preliminary work.
+Notably, most of them employ complex training procedures, including multiple stage of imitation learning as well as reward shaping. The most common paradigm for these methods is *centralised fully-observable* MAPF, although, some ease the centralisation, assuming selective communication between the agents.  
+
+
+### PICO
+
+| Paper      | Code        | 
+|------------|-------------|
+| [ArXiv](https://arxiv.org/pdf/2202.03634)      | [GitHub](https://github.com/mail-ecnu/PICO)      |
+
+The method incorporates the implicit planning priorities into the communication topology within the decentralised multi-agent reinforcement learning framework. Assembling with the classic coupled planners, the implicit priority learning module can be utilised to form the dynamic communication topology, which also builds an effective collision-avoiding mechanism. PICO performs significantly better in large-scale MAPF tasks in success rates and collision rates than state-of-the-art Elearning-based planners.
+
 ### Follower
 
 | Paper      | Code        | 
 |------------|-------------|
 | [ArXiv](https://arxiv.org/abs/2310.01207)      | [GitHub](https://github.com/Cognitive-AI-Systems/learn-to-follow)      |
 
-FOLLOWER is comprised of the two complementary modules combined into a coherent pipeline.
-1. Heuristic Path Decider is used to construct an individual path to the goal.
-2. Learnable Follower is invoked to reach the first waypoint on this path. This module decides which actions to take until the waypoint is reached or until the agent gets away from the path. In both cases, the sub-goal decider is called again, and the cycle repeats.
+Follower is a *decentralised* learnable MAPF method, targeting lifelong MAPF, i.e. constantly re-assigning goals after the agents complete them. It is comprised of the two complementary modules combined into a coherent pipeline.
+1. Heuristic Path Decider is used to construct an individual path to the goal, using breadth-first search (BFS) to get not the shortest but most dispersed paths.
+2. Learnable Follower is invoked to discover colision avoidance policies for the planned paths.
 
 
 ### MATS-LP
@@ -255,7 +274,7 @@ The method combines two principal ingredients.
 
 The method introduces two novel and conceptually different policies for PO-MAPF. 
 
-1. based on the search-based re-planning (REPLAN). At each timestep, an agent builds the shortest path to its goal using a history of the egocentric observations by a heuristic search algorithm. Other agents are considered as obstacles that need to be avoided. To mitigate the possible deadlocks and oscillating behavior of the agents, it's augmented re-planning with additional decision-making procedures that pick a greedy or wait action under certain conditions.
+1. based on the search-based re-planning (REPLAN). At each timestep, an agent builds the shortest path to its goal using a history of the egocentric observations by a heuristic search algorithm. Other agents are considered as obstacles that need to be avoided. To mitigate the possible deadlocks and oscillating behaviour of the agents, it's augmented re-planning with additional decision-making procedures that pick a greedy or wait action under certain conditions.
 2. based on a specifically designed reinforcement learning algorithm: Evolving Policy Optimization with Memory (EPOM). EPOM uses an actor-critic architecture with a recurrent neural network as a state approximator. One of the novel features of EPOM setting it apart from similar approaches, is the mechanism of augmenting the current observation with a patch of the previously observed and memorised map. Not only does this help stabilise learning, but it also contributes to higher performance of the policy. To determine the hyperparameters of the model during the learning process, a [population-based training approach](https://arxiv.org/abs/1711.09846) is utilised.
 
 ### SCRIMP
@@ -266,6 +285,15 @@ The method introduces two novel and conceptually different policies for PO-MAPF.
 
 This is a method where agents learn individual policies from even very small (down to 3x3) FOVs, by relying on a highly-scalable global communication mechanism based on a modified transformer. Futhther equipping the agents with a state-value-based tie-breaking strategy, improves performance in symmetric situations, and introducing intrinsic rewards to encourage exploration while mitigating the long-term credit assignment problem.
 
+### DHC
+
+| Paper      | Code        | 
+|------------|-------------|
+| [ArXiv](https://arxiv.org/abs/2106.11365)      | [GitHub](https://github.com/ZiyuanMa/DHC)      |
+
+
+This paper combines communication with deep $$Q$$-learning to provide a novel learning based method for MAPF, where agents achieve cooperation via graph convolution. To guide RL algorithm on long-horizon goal-oriented tasks, the authors embed the potential choices of shortest paths from single source as heuristic guidance instead of using a specific path as in most existing works. The method treats each agent independently and trains the model from a single agent’s perspective. The final trained policy is applied to each agent for decentralized execution. The whole system is distributed during training and is trained under a curriculum learning strategy.
+
 ### DCC
 
 | Paper      | Code        | 
@@ -273,14 +301,14 @@ This is a method where agents learn individual policies from even very small (do
 | [ArXiv](https://arxiv.org/abs/2109.05413)      | [GitHub](https://github.com/ZiyuanMa/DCC)      |
 
 DCC is a simple yet efficient mechanism to reduce communication overhead in multi-agent systems. DCC can be instantiated by independent Q-learning [IQL](#iql), or any framework of centralized training and decentralized execution, such as [QMIX](#qmix) and [VDN](#vdn). The authors consider a request-reply scenario different from the traditional setup where each agent only sends out an almost information-less indicator, e.g. a scalar value, as the request signal. Instead, in the setup, each agent sends out a request signal with rich information including its own messages along with the relative positions of neighbors. In this way, after receiving the request, the agents being requested can immediately benefit from this query by collecting some information from the query agent.
-
+<!-- 
 ### LaCAM
 
 | Paper      | Code        | 
 |------------|-------------|
 | [ArXiv](https://arxiv.org/abs/2211.13432)      | [GitHub](https://github.com/Kei18/lacam)      |
 
-This paper proposes a novel algorithm called lazy constraints addition search for MAPF (LaCAM). From the theoretical side, LaCAM is complete. It returns a solution for solvable instances, otherwise reports the non-existence. LaCAM has an easily extensible structure, which comprises a two-level search. At the high-level, it searches a sequence of configurations, where a configuration is a tuple of locations for all agents. At the low-level, it searches constraints that specify which agents go where in the next configuration. Successors at the high-level (i.e., configurations) are generated in a lazy manner while following constraints from the low-level, leading to a dramatic reduction of the search effort.
+This paper proposes a novel algorithm called lazy constraints addition search for MAPF (LaCAM). From the theoretical side, LaCAM is complete. It returns a solution for solvable instances, otherwise reports the non-existence. LaCAM has an easily extensible structure, which comprises a two-level search. At the high-level, it searches a sequence of configurations, where a configuration is a tuple of locations for all agents. At the low-level, it searches constraints that specify which agents go where in the next configuration. Successors at the high-level (i.e., configurations) are generated in a lazy manner while following constraints from the low-level, leading to a dramatic reduction of the search effort. -->
 
 ### RHCR
 
