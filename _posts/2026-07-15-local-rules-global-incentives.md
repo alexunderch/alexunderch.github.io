@@ -1,6 +1,6 @@
 ---
 title: "Self-Organisation Lacks a Global Incentive"
-date: 2026-07-15 14:00:00 +0000
+date: 2026-07-15 12:00:00 +0000
 categories: [Research, Ideas]
 tags: [decentralised_systems, self_organisation, incentive_design]
 math: true
@@ -13,7 +13,7 @@ using nothing but local communication and a shared dual variable. It's a genuine
 <iframe src="https://pub.sakana.ai/sheaf-admm/" width="100%" height="500px" style="border: 1px solid var(--card-border-color); border-radius: 8px; background: white;"></iframe>
 
 
-However, as was reading the paper and even talking with its main author (nice lad!), I started feeling something a bit of about the paper's objective: nothing in it asks whether an agent *wants* to be there. In other words, *is there an equilibrium the agent aims to achieve?* Therefore, in this I would like to discuss what might be missing, why the obvious fixes don't close the gap, and what a fix that actually comes with a guarantee looks like.
+However, as was reading the paper and even talking with its main author (nice lad!), I started feeling something a bit of about the paper's objective: nothing in it asks whether an agent *wants* to be there. In other words, *is there an equilibrium the agent aims to achieve?* Therefore, in this I would like to discuss what might be missing, why the obvious fixes don't close the gap, and what a fix that actually comes with a guarantee looks like. 
 
 > The point of this piece is to look at the problem through a different lens.
 {: .prompt-info }
@@ -25,7 +25,7 @@ across those interactions:
 $$
     U_i(\pi_i, \pi_{\mathcal{N}(i)}) = \sum_{j \in \mathcal{N}(i)}  E_{a_i\sim\pi_i, a_j\sim\pi_j} [ u_i^{(i,j)}(a_i,a_j) ]
 $$
-where $u_i^{(i,j)}: A_i \times A_j \to \mathbb{R}$ is agent $i^{\text{th}}$ payoff from its pairwise game with neighbor $j$. This is exactly the structure Sheaf-ADMM is built for:
+where $u_i^{(i,j)}: A_i \times A_j \to \mathbb{R}$ is agent $i^{\text{th}}$ payoff from its pairwise game with neighbour $j$. This is exactly the structure Sheaf-ADMM is built for:
 local objectives, local communication, no global payoff tensor.
 
 **What Sheaf-ADMM actually optimises.** Give each agent a state $x_i$ in some
@@ -57,7 +57,7 @@ $$
 
 
 I saw a problem into the objective: **$f_i$ is described as "a
-convex function," and it we don't know much about $U_i$.** Its elements have such a "handcrafted" cooperative representation, which make me question what would change if we tried to solve a tension between the agents who actually compete. [^1] 
+convex function," and it we don't know much about $U_i$.** Its elements have such a "handcrafted" cooperative representation (it is a joke but $f_i$ doesn't even "see" $U_i$ to be aware of it!), which make me question what would change if we tried to solve a tension between the agents who actually compete. [^1] 
 
 
 ## Notions of "good outcome", or equilibrium, in multi-agent systems
@@ -76,14 +76,16 @@ $$
 
 **Coarse correlated equilibrium (CCE).** $\sigma$ may be any joint
 distribution. Think of it as a having a shared recommendation device (that global incentive) that hands each agent an action to play before it decides whether to listen. $\sigma$ is a CCE if no agent gains by ignoring the recommendation for one fixed
-alternative, chosen in advance:
+alternative, chosen in advance
+
 $$
     E_{a\sim\sigma}[u_i(a)]  \geq E_{a\sim\sigma}[u_i(a_i', a_{-i})]    \quad   \text{for every fixed } a_{i'} \in A_i.
 $$
 
 **Correlated equilibrium (CE).** It asks for a stronger requirement: no agent gains
 from any *function* of its own recommendation: "whenever I'm told to
-play $a_i$, play $\delta(a_i)$ instead":
+play $a_i$, play $\delta(a_i)$ instead"
+
 $$
     E_{a\sim\sigma}[u_i(a)]  \geq  E_{a\sim\sigma}[u_i(\delta_i(a_i), a_{-i})]  \quad   \text{for every } \delta_i: A_i \to A_i
 $$
@@ -93,17 +95,10 @@ These nest: NE is contained in CE, which is contained in CCE. Nash is the specia
 
 ## Why the obvious fixes all reach for the smallest, hardest set
 
-**Make the sheaf itself game-theoretic.** Recent work casts Nash equilibria
-as global sections of a sheaf built from best-response correspondences, with
-cohomology measuring the obstruction to a consistent equilibrium existing.
-Elegant, and the cohomology-as-obstruction idea is the right shape. But it's
-an existence result in the language of derived sheaves and topoi, like Jeffrey likes. It proves sections exist, it doesn't hand you an update rule two neighboring agents can
-run with a dot product. In more detail, [Hernández & Sánchez-Soto](https://arxiv.org/abs/2606.01663) define a sheaf whose stalks contain utility vectors and strategy distributions, with restriction maps encoding both geometric parallel transport and best-response dynamics. However, their framework *is not* differentiable, as far as I understand.
+**Make the sheaf itself game-theoretic.** Recent work casts Nash equilibria as global sections of a sheaf built from best-response correspondences, with cohomology measuring the obstruction to a consistent equilibrium existing. Elegant, and the cohomology-as-obstruction idea is the right shape. But it's an existence result in the language of derived sheaves and topoi, like Jeffrey likes. It proves sections exist, it doesn't hand you an update rule two neighbouring agents can run with a dot product. In more detail, [Hernández & Sánchez-Soto](https://arxiv.org/abs/2606.01663) provide distributed algorithms, not just existence proofs. What they don't provide is differentiability: their restriction maps are fixed by geometry, not learned.
 
-**Learn it with a big neural net.** [Neural Equilibrium Solvers](https://arxiv.org/abs/2210.09257) take an entire payoff tensor and output an equilibrium (Nash, CE, or CCE) in one
-forward pass, after iterative training over many sampled games. It works (on paper)
-but "takes the whole payoff tensor as input" is precisely what a graphical,
-locally-communicating architecture is trying to avoid needing.
+**Learn it with a big neural net.** [Neural Equilibrium Solvers](https://arxiv.org/abs/2210.09257) take an entire payoff tensor and output an equilibrium (Nash, CE, or CCE) in one forward pass, after iterative training over many sampled games. It works (on paper)
+but "takes the whole payoff tensor as input" is precisely what a graphical, locally-communicating architecture is trying to avoid needing.
 
 
 ### Method
@@ -132,8 +127,8 @@ Output: α — [B, 1, N, A] for CCE, [B, 1, N, A, A] for CE
 Given duals α, the closed-form primal recovery implements Equation (7) from the paper [1]:
 1. Compute deviation contributions per player (`gain_p`)
 2. Form logits: `l(a) = μ·W(a) − ·Σ_p gain_p(a)`
-3. Recover `σ(a) ∝ σ̂(a) · exp(l(a))`
-4. Recover `ε_p = (ε̂_p − ε⁺) · exp(−Σα_p / ρ) + ε⁺`
+3. Recover the joint strategy `σ(a) ∝ σ̂(a) · exp(l(a))`
+4. Recover the equilbrium constraints `ε_p = (ε̂_p − ε⁺) · exp(−Σα_p / ρ) + ε⁺`
 
 
 The dual loss is minimised:
@@ -141,7 +136,7 @@ The dual loss is minimised:
 L_dual = log_sum_exp + ε⁺ · Σ_p Σ_a α_p(a) − ρ · Σ_p ε_p
 ```
 
-**Turn the dual into a payment.** This is the closest of the three, described in the [paper](https://arxiv.org/abs/2606.20960), so it's worth writing down exactly where it breaks. Suppose agent $i$'s whole decision is a scalar $\pi_i \in [0,1]$ (probability of the "compliant" action), and it receives a transfer $p_i$ in expectation, conditional on realising the compliant action, forfeited otherwise. Its augmented objective is
+**Turn the dual into a payment.** This is the closest of the three, described in the [SETE paper](https://arxiv.org/abs/2606.20960), so it's worth writing down exactly where it breaks. Suppose agent $i$'s whole decision is a scalar $\pi_i \in [0,1]$ (probability of the "compliant" action), and it receives a transfer $p_i$ in expectation, conditional on realising the compliant action, forfeited otherwise. Its augmented objective is
 
 $$
     \hat{U}_i(\pi_i) = U_i(\pi_i, \pi_{-i}) + \pi_i  p_i
@@ -158,9 +153,7 @@ $$
 \end{aligned}
 $$
 
-Look at those last two equations together: deviation_gain_i and
-$\text{deviation\_gain}_i$ are the same quantity up to sign. The instant
-$\text{deviation\_gain}_i$ hits zero, the primal gradient is *also* exactly zero. Both variables freeze at precisely the point of indifference, never at a point of actual preference because one residual is driving both updates at once. This might cause a stalling problem where the agents stuck in a "half cooperation state".
+Look at those last two equations together: deviation\_${gain}_i$ and $d(\hat{U}_i)/d(\pi_i)$ are the same quantity up to sign. The instant deviation\_${gain}_i$ hits zero, the primal gradient is *also* exactly zero. Both variables freeze at precisely the point of indifference, never at a point of actual preference because one residual is driving both updates at once. This might cause a stalling problem where the agents stuck in a "half cooperation state". Decoupling the stages (as SETE actually does, but I'd refer the reader to the paper) resolves this at the cost of a sequential game structure.
 
 
 > All three fixes are aimed at converging to the Nash equilibrium. That's the thing worth questioning. Why?
@@ -227,7 +220,7 @@ $$
 $$
 
 
-> HOWEVER, If observability is already full ($i$ sees $j$'s literal action every round), both sides' estimate of the correlation device is already the sameempirical distribution and the sheaf update won't really do anything. Moreover, we need to keep the regret estimation quite accurate to maintain sheaves' updates bounded (it's necessary to prove!)
+> HOWEVER, If observability is already full ($i$ sees $j$'s literal action every round), both sides' estimate of the correlation device is already the sameempirical distribution and the sheaf update won't really do anything. Moreover, we need to keep the regret estimation quite accurate to maintain sheaves' updates bounded (it's necessary to prove!) [^3]
 {: .prompt-warning }
 
 **A bounded constant instead of unbounded regret.** We might partly address the latter problem. Extental regret R_i^T is an average, so it stays bounded by the payoff range no matter how large $T$ gets. What does grow without bound is the raw running sum behind it, before dividing by $T$. To alleviate that, one can propose a single per-edge scalar, no growing history, a fixed willingness-to-pay-style cap. *Or just introduce a discount factor to the updates*
@@ -266,7 +259,9 @@ The corrected algorithm
     *Output*: exponentially-weighted empirical play (or plain time-average if gamma=1).
 
     *Guarantee*: full observability and gamma=1 (no discount) recovers
-    the CE. Partial observability additionally needs the two-timescale assumption (previous scetion). Discounting (gamma<1) trades that guarantee for the weaker, adaptive/tracking version.
+    the CE. Partial observability additionally needs the two-timescale
+    assumption (previous scetion). Discounting (gamma<1) 
+    trades that guarantee for the weaker, adaptive/tracking version.
 ```
 
 ## The end
@@ -284,4 +279,6 @@ different directions.
 
 [^1]: It reminded me of how in a  multi-agent reinforcement learning (MARL), namely in [COMA](https://arxiv.org/abs/1705.08926), the credit assignment problem is solved by calculating a difference reward. It measures an individual agent's unique contribution by taking the global reward and subtracting the reward achieved if that agent had taken a different action.
 
-[^2] There is also a version for MARL algorithms, see this [paper](https://arxiv.org/abs/2206.10614).
+[^2]: There is also a version for MARL algorithms, see this [paper](https://arxiv.org/abs/2206.10614).
+
+[^3]: This is true but misses a deeper point: the sheaf update still earns its keep by providing a differentiable, learned compression of neighbour information. Even when $F_{ij}$ = identity, having it as a learnable parameter means the architecture can adapt to partial observability during training and deploy with full observability at test time. The sheaf actually acts like a topological regulariser!, not just a runtime mechanism.
