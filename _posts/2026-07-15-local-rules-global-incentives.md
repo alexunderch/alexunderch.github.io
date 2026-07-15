@@ -94,10 +94,10 @@ These nest: NE is contained in CE, which is contained in CCE. Nash is the specia
 
 ### Method
 
-The network consumes a 4-channel tensor of shape [B, 4, N, A1, ..., AN]:
-- Channel 0: Normalized payoffs `$hat{G}$`
-- Channel 1: Target epsilon `$\hat{varepslion}$` (broadcasted)
-- Channel 2: Target joint strategy `$\hat{sigma}$` (broadcasted)
+The network consumes a 4-channel tensor of shape `[B, 4, N, A1, ..., AN]`:
+- Channel 0: Normalized payoffs $\hat{G}$
+- Channel 1: Target epsilon $\hat{\varepsilon}$ (broadcasted)
+- Channel 2: Target joint strategy $\hat{\sigma}$(broadcasted)
 - Channel 3: Welfare `W` (broadcasted)
 
 The pipeline is following
@@ -143,7 +143,7 @@ $$
 \end{aligned}
 $$
 
-Look at those last two equations together: deviation\_${gain}_i$ and $d(\hat{U}_i)/d(\pi_i)$ are the same quantity up to sign. The instant deviation\_${gain}_i$ hits zero, the primal gradient is *also* exactly zero. Both variables freeze at precisely the point of indifference, never at a point of actual preference, because one residual is driving both updates at once. In practice, that stalls the agents in a kind of half-cooperation limbo.
+Look at those last two equations together: deviation ${gain}_i$ and $d(\hat{U}_i)/d(\pi_i)$ are the same quantity up to sign. The instant deviation ${gain}_i$  hits zero, the primal gradient is *also* exactly zero. Both variables freeze at precisely the point of indifference, never at a point of actual preference, because one residual is driving both updates at once. In practice, that stalls the agents in a kind of half-cooperation limbo.
 
 
 > All three fixes are aimed at converging to the Nash equilibrium. That's the thing worth questioning. Why?
