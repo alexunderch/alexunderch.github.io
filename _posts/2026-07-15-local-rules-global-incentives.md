@@ -178,7 +178,7 @@ Both of these are uncoupled. Both carry an unconditional guarantee, for every ga
 
 That is exactly a sheaf consensus problem
 $$
-    z_ij  =  F_{i\to(i,j)}(x_i)  =  F_{j\to(i,j)}(x_j)
+    z_{ij}  =  F_{i\to(i,j)}(x_i)  =  F_{j\to(i,j)}(x_j)
 $$
 
 reconciled by the same $z$/$u$ loop Sheaf-ADMM already has
