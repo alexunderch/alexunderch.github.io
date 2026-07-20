@@ -1,6 +1,6 @@
 ---
 title: "An example where collective intelligence helps"
-date: 2026-07-20 20:00:00 +0000
+date: 2026-07-20 21:00:00 +0000
 categories: [Research, Ideas]
 tags: [decentralised_systems, self_organisation, reinforcement_learning]
 math: true
