@@ -1,6 +1,6 @@
 ---
 title: "An example where collective intelligence helps"
-date: 2026-07-21 00:00:00 +0000
+date: 2026-07-21 07:00:00 +0000
 categories: [Research, Ideas]
 tags: [decentralised_systems, self_organisation, reinforcement_learning]
 math: true
@@ -9,7 +9,7 @@ description: How a corner case allows us to find a place for collective intellig
 
 > "I absolutely love toy experiments" — Jeffrey Seely.
 
-Nowadays, reinforcement learning (RL) serves as a predominant paradigm in training or finetuning of decision-making systems in pretty much field of science or industry, partly because of adoption of RL [enviroments](https://github.com/PrimeIntellect-ai/verifiers). One of the maintainers, Will Brown, gave nice advice to people whose runs didn't really converge — "increase batch size."
+Nowadays, reinforcement learning (RL) serves as a predominant paradigm in training or finetuning of decision-making systems in pretty much field of science or industry, partly because of adoption of RL [environments](https://github.com/PrimeIntellect-ai/verifiers). One of the maintainers, Will Brown, gave nice advice to people whose runs didn't really converge — "increase batch size."
 
 <blockquote class="twitter-tweet"><p lang="en" dir="ltr">keep learning rate on the lower side, don&#39;t make your batch size too small, vary your system prompt and/or tools within the train set, consider adding some other envs to the train mix at lower proportions for diversity, monitor online eval performance for other tasks</p>&mdash; will brown (@willccbb) <a href="https://x.com/willccbb/status/2029722145329402115?ref_src=twsrc%5Etfw">March 6, 2026</a></blockquote> <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
 
@@ -29,14 +29,14 @@ I won't act as an expert and just list three obvious reasons why it's so tough t
 * Memory is constrained (small networks, no replay)
 * The environment is non-stationary by design
 
-One of recent papers—"[Streaming Deep Reinforcement Learning Finally Works](https://arxiv.org/abs/2410.14606)" by Elsayed et al.'s—addresses this via adding back elibility traces, baselines, introdcuing normalisation and overshooting (lookahead) to the optimisation to empirically reduce variance of the updates in various RL algorithms. However, Elsayed et al. show the barrier is deeper: **it's about representation collapse, target network instability, and optimiser state divergence in deep nets**. The variance acts really as a symptom, not the root cause. [^1]
+One of recent papers—"[Streaming Deep Reinforcement Learning Finally Works](https://arxiv.org/abs/2410.14606)" by Elsayed et al.'s—addresses this via adding back eligibility traces, baselines, introducing normalisation and overshooting (lookahead) to the optimisation to empirically reduce variance of the updates in various RL algorithms. However, Elsayed et al. show the barrier is deeper: **it's about representation collapse, target network instability, and optimiser state divergence in deep nets**. The variance acts really as a symptom, not the root cause. [^1]
 
->The uncomfortable truth (trvthnuke): even with perfect baselines and variance reduction, streaming deep RL can fail because the optimisation dynamics themselves become unstable and proved to work only emprically.
+>The uncomfortable truth (trvthnuke): even with perfect baselines and variance reduction, streaming deep RL can fail because the optimisation dynamics themselves become unstable and proved to work only empirically.
 {: .prompt-warning }
 
 At the recent ICML I saw a couple papers that tried to address the problems: [^2]
-1. Introducing baselines, however, the estimation states noisy, therefore, doesn't actually reduce anything
-2. Eligibility traces average over time, but in non-stationary environments (the Alife regime or recomendation systems), old gradients become biased and can't fully stabilise the updates 
+1. Introducing baselines, however, the estimate states noisy, therefore, doesn't actually reduce anything
+2. Eligibility traces average over time, but in non-stationary environments (the Alife regime or recommendation systems), old gradients become biased and can't fully stabilise the updates 
 3. Self-prediction (BYOL-RL, SPR) stabilises representations but doesn't approach the gradient variance itself. Also, some of the methods cheat on using bigger batch sizes to establish accurate representations.
 
 > So, what's next?
@@ -44,19 +44,19 @@ At the recent ICML I saw a couple papers that tried to address the problems: [^2
 
 ## Collective escape
 
-> Remeber that it's just a proposition: artificially complicate the problem's structure to enrich the problem set.
+> Remember that it's just a proposition: artificially complicate the problem's structure to enrich the problem set.
 {: .prompt-tip }
 
-Let's commit to surprise move and move out of the comfort zone. Why am I so focues on Alife applications. Isn't it boring—just iterate your cellular automata and call this art? Bullshit. Artificial life gives sends us a hint: flocks, ant colonies, bacterial swarms, societies—agents don't usually learn in isolation. They're embedded in a collective. Here I can start waffling about equilibria and the problem structure. But not this time—we go for a different abstraction.
+Let's commit to surprise move and move out of the comfort zone. Why am I so focused on Alife applications. Isn't it boring—just iterate your cellular automata and call this art? Bullshit. Artificial life gives sends us a hint: flocks, ant colonies, bacterial swarms, societies—agents don't usually learn in isolation. They're embedded in a collective. Here I can start waffling about equilibria and the problem structure. But not this time—we go for a different abstraction.
 
-Making problem multi-agent combinatory enriches the solution space. Usually, it's a problem we want to avoid. Not this time. Problem structure suits for sistributed optimisation over a shared landscape (the task space the aims to solve), where each agent (ant) is a noisy gradient sampler and the collective (colony) is a variance-reduction device.
+Making problem multi-agent combinatory enriches the solution space. Usually, it's a problem we want to avoid. Not this time. Problem structure suits for distributed optimisation over a shared landscape (the task space the aims to solve), where each agent (ant) is a noisy gradient sampler and the collective (colony) is a variance-reduction device.
 
 Let's illustrate the problem on the simplest example, Decentralised Stochastic Gradient Descent ([D-SGD](https://arxiv.org/abs/2306.00256)). [^3]
 
 
 We work with $n$ agents indexed by $i\in\{1, \ldots, n\}$. Each agent maintains local parameters $\theta^i\in\mathbb{R}^d, d>1$. The agents are arranged into a communication graph, an undirected graph $G=(V, E)$, where $V=\{1, \ldots, n\}$. Agents can observe each other iff $i, j\in V \to (i, j) \in E$. 
 
-The system is equipped with a doubly stochatic Mixing (topology) Matrix $W \in \mathbb{R}^{n\times n}$ ($W\mathbf{1} = \mathbf{1}$, $W^\top\mathbf{1} = \mathbf{1}$, rows and colums sum to 1) that respects the graph topology: $W_{ij}=1$ iff $(i, j) \in E$ or $i=j$.
+The system is equipped with a doubly stochastic Mixing (topology) Matrix $W \in \mathbb{R}^{n\times n}$ ($W\mathbf{1} = \mathbf{1}$, $W^\top\mathbf{1} = \mathbf{1}$, rows and columns sum to 1) that respects the graph topology: $W_{ij}=1$ iff $(i, j) \in E$ or $i=j$.
 
 Each agent has a local scalar objective $f^i : \mathbb{R}^d \to \mathbb{R}$ (your favourite standard RL objective). The global objective is: 
 $$
@@ -80,7 +80,7 @@ $$
 Additionally, the method puts two critical assumptions on the collective:
 
 1. $\frac{1}{n}\sum_{i=1}^n \|\nabla f_i(\theta_i) - \nabla f(\theta)\|^2 \leq \zeta^2, \quad \forall \theta$. $\zeta$ measures how different agents' local problems are. In our Alife setting it is small when neighbours face similar subproblems (smooth landscape) and large when they don't (patchy environment, competition).
-2. Spectral gap (1 - the second largest eigenvalue) of $W$ is bounded between 0 and 1. It measures connectivity and shortly requires some interation to be present.
+2. Spectral gap (1 - the second largest eigenvalue) of $W$ is bounded between 0 and 1, staying bounded away from zero. It measures connectivity and shortly requires some interaction to be present.
 
 | Topology        | $\rho$ (approx) | Mixing time | Variance reduction     |
 | --------------- | --------------- | ----------- | ---------------------- |
@@ -89,6 +89,7 @@ Additionally, the method puts two critical assumptions on the collective:
 | 2D grid         | $O(1/n)$        | $O(n)$      | $\sim n$ (slow mixing) |
 | Ring            | $O(1/n^2)$      | $O(n^2)$    | $\sim n$ (very slow)   |
 
+Pay attention to the fact that $\rho$ doesn't vanish as the network grows or as topology gets sparse.
 
 ## Why bother?
 
@@ -105,7 +106,7 @@ If we have uniform $k$ neighbour mixing, $\sum_j W_{ij}^2 = 1/k$, giving $k$ fol
 D-SGD provides the following bias-variance tradeoff on the gradient update ([source](https://arxiv.org/abs/2105.08023)): 
 
 $$
-\text{Var}(g_i^{\text{corrected}}) \approx \sigma^2\left(1 - \frac{1}{k}\right) + O\left(\frac{\zeta^2}{\rho^2}\right)
+\text{Var}(g_i^{\text{corrected}}) \approx \frac{\sigma^2}{k} + O\left(\frac{\zeta^2}{\rho^2}\right)
 $$
 
 you reduce local variance by $1/k$  but pay $\zeta^2/\rho^2$ in consensus bias.
@@ -125,7 +126,7 @@ The intuition could be formalised in a form of pseudocode
 ```
 1. Each agent gets a noisy gradient: g_i = ∇f(θ_i) + ξ_i where ξ_i ~ N(0, σ²I) 
 2. The noise is INDEPENDENT across agents: E[ξ_i · ξ_j] = 0 for i ≠ j 
-3. Collective RL reduces variance by averaging over the poplation throgh consensus step: 
+3. Collective RL reduces variance by averaging over the population through consensus step: 
 θ_i ← Σ_j W_ij θ_j. This implicitly averages independent noise realizations → Variance drops by factor ~k (neighbourhood size) 
 4. The displacement d_i = θ̄_i (population mean) - θ_i encodes the accumulated difference between local and neighbourhood gradients. It acts as an implicit control variate. 
 5. The update: 
