@@ -145,8 +145,10 @@ Not really. Collective learning doesn't eliminate the bias-variance tradeoff in 
 
 ## Toy experiment 
 
-> Code will be released within a week since the publication
-{: .prompt-info }
+> Code is released below:
+<details>
+<script src="https://gist.github.com/alexunderch/64bb588939bd2229a97531cb66897f4c.js"></script>
+</details>
 
 We test whether a collective of streaming RL agents can overcome the variance floor that traps single-agent learners. For this, we use `CartPole-v1`  as a testbed, but keep the mechanism general: spatial variance reduction via decentralised consensus.
 
