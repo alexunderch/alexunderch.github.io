@@ -2,7 +2,7 @@
 title: "Viral adaptation is all we need? (Part 1)"
 date: 2026-08-03 12:00:00 +0000
 categories: [Research, Applied]
-tags: [myopic_optimisation, generative_models , opponent_modelling]
+tags: [myopic_optimisation, generative_models, opponent_modelling]
 math: true
 description: Eye-opening problem of antibody synthesis. 
 ---
