@@ -196,6 +196,115 @@ $$
 
 Looks pretty much as the [OUTER LOOP](#antibody-fitness-outer-loop--leader) of the ADIOS algorithm, right?
 
+### Discrete Diffusion [Preliminaries]
+
+For a large search space, it makes more sense to perform its stochastic exploration instead of generating the sequence autoregressively (token-by-token). The policy uses an **iterative denoising** process—initialise a taget sequence and gradually fill it in over $N$ steps, starting from a completely blank (masked) sequence.
+
+#### The Masked Forward Process
+
+We augment the vocabulary with a special mask token: $\mathcal{A} \cup \{m\}$.
+
+The **forward process** is a fixed noising procedure. At each diffusion step $n = 1, \dots, N$, every position in the sequence is independently either:
+- **kept** with probability $\beta_n$, or
+- **masked** with probability $1 - \beta_n$.
+
+Put formally, for a single position with value $a_{n-1}^k \neq m$ [^4]:
+$$
+q(a_n^k = a_{n-1}^k \mid a_{n-1}^k) = \beta_n, \qquad
+q(a_n^k = m \mid a_{n-1}^k) = 1 - \beta_n
+$$
+
+Once a position is masked, it stays masked:
+$$
+q(a_n^k = m \mid a_{n-1}^k = m) = 1
+$$
+
+#### Noise Schedule
+
+The values $\beta_1, \beta_2, \dots, \beta_N \in (0,1)$ form a **noise schedule**, typically increasing so that masking becomes more aggressive over time. A common choice are cosine or linearly annealing schedules.
+
+Because masking is applied independently at each step, the probability that a position *survives* unmasked after $n$ steps is $\alpha_n = \prod_{i=1}^{n} \beta_i$.
+
+This gives a simple closed-form for the distribution of a noised position given the original clean token $a_0^k$:
+$$
+q(a_n^k = a_0^k \mid a_0^k) = \alpha_n, \qquad
+q(a_n^k = m \mid a_0^k) = 1 - \alpha_n
+$$
+
+So at step $n$, a position is either the original nucleotide (with probability $\alpha_n$) or a mask (with probability $1-\alpha_n$). After enough steps, $\alpha_N \approx 0$ and the sequence is almost entirely masked — pure noise.
+
+#### The Learned Reverse Process
+
+The **reverse process** is the generative model. Starting from a fully masked sequence $\mathbf{a}_N$ (sampled from the prior), it iteratively denoises one step at a time:
+$$
+\mathbf{a}_{N} \to \mathbf{a}_{N-1} \to \cdots \to \mathbf{a}_0
+$$
+
+A neural network $f_\theta$ (in our case, it's Transformer) looks at the current noised sequence $\mathbf{a}_n$ and step index $n$, and predicts the **original clean sequence**:
+$$
+\boldsymbol{\mu}_\theta(\mathbf{a}_n, n) \;\approx\; \mathbf{a}_0
+$$
+
+For each position $k$, $\boldsymbol{\mu}_\theta(\mathbf{a}_n, n)$ outputs a probability distribution over the four nucleotides which is denoted by the paper's authors as
+$$
+\mu_\theta(\mathbf{a}_n, n)_{a_0^k}
+$$
+for the predicted probability that the original clean token at position $k$ was $a_0^k$.
+
+The policy's sampling distribution is defined by running this reverse chain to completion:
+$$
+\pi_\theta(\mathbf{a}_0) \;=\; p_\theta(\mathbf{a}_0 \mid \mathbf{a}_N) \cdots p_\theta(\mathbf{a}_{N-1} \mid \mathbf{a}_N)
+$$
+
+#### Training Objective (Standard ELBO)
+
+The model is trained to reconstruct the clean sequence from its noised versions. As the full objective is intractable, standard Evidence Lower Bound (ELBO) for a single clean sequence $\mathbf{a}_0$ is used
+
+$$
+\mathcal{L}_{\text{ELBO}}(\mathbf{a}_0; \theta) 
+\;=\; -\sum_{n=1}^{N} \bar{\alpha}_n \,
+\mathbb{E}_{\mathbf{a}_n \sim q(\cdot \mid \mathbf{a}_0)}\!\left[
+\sum_{k=0}^{K-1} \mathbb{1}\{a_n^k = m\} \cdot 
+\log \mu_\theta(\mathbf{a}_n, n)_{a_0^k}
+\right]
+$$
+
+**The formula writes as:**
+- We sample a diffusion timestep $n$ and a noised sequence $\mathbf{a}_n$ by randomly masking positions of $\mathbf{a}_0$ according to $q$.
+- We only ask the model to predict masked positions.  $\mathbb{1}\{a_n^k = m\}$ is an indicator that is $1$ only if position $k$ is masked at step $n$. 
+- $\log \mu_\theta(\mathbf{a}_n, n)_{a_0^k}$ is the log-probability the model assigns to the true nucleotide $a_0^k$.
+- $\bar{\alpha}_n$ is a weighting term derived from the schedule (it up-weights certain timesteps).
+
+This is essentially a **masked language modeling** loss, but the masking pattern follows the diffusion schedule rather than being uniform.
+
+If you prefer the language of code, 
+
+```Python
+def masked_prediction_loss(
+    model, 
+    diffusion_schedule: Array, 
+    a0: Array, 
+    cond: Array, 
+    rng: PRNGKey, 
+) -> Array:
+  B, _ = a0.shape
+  N = diffusion.num_steps
+  rng, t_rng, noise_rng = jax.random.split(rng, 3)
+  t = jax.random.randint(t_rng, (B,), 0, N)
+
+  keep_prob = diffusion_schedule.state[t][:, None]  # (B, 1)
+  mask_token = diffusion_schedule.dim - 1
+  keep = jr.bernoulli(noise_rng, keep_prob, shape=a0.shape)  # (B, L)
+  a_t = jnp.where(keep, a0, mask_token)
+  mask = ~keep
+
+  logits = model(a_t, t, cond, train=True)
+  log_probs = jax.nn.log_softmax(logits, axis=-1)
+  token_ll = jnp.take_along_axis(log_probs, a0[:, :, None], axis=-1).squeeze(-1)
+  masked_nll = -jnp.where(mask, token_ll, 0.0)
+  return masked_nll.sum(-1)
+```
+
 
 ### Policy Mirror Descent (PMD) Target
 
@@ -231,6 +340,9 @@ $$
 Because this objective is intractable to minimise directly, the authors derive a tractable upper bound using the diffusion ELBO.
 
 
+>Intuitively, this target increases the probability of high-reward sequences and decreases the probability of low-reward sequences, while the KL term keeps the update from being too drastic.
+{.prompt-tip }
+
 ### Discrete Diffusion Policy
 
 > There is a nice [blogpost](https://kuleshov-group.github.io/blog/blog/2026/how-to-build-a-diffusion-language-model/) about diffusion models from Volodymyr Kuleshov's lab. I have learnt a lot from there.
@@ -240,47 +352,14 @@ The policy $\pi_\theta$ is a **masked discrete diffusion model** over the sequen
 
 **Augmented vocabulary:** $\mathcal{A} \cup \{m\}$ where $m$ is a mask token.
 
-**Forward process:** Each position is independently masked over $N$ steps according to a fixed noise schedule $\{\beta_n\}_{n=1}^N$. The posterior probability that position $k$ is unmasked at step $n$ is $\alpha_n$.
+### Forward KL Policy Update
 
-**Reverse process:** A model $f_\theta$ predicts the clean sequence $\boldsymbol{\mu}_\theta(\mathbf{a}_n, n)$ from a noised sequence $\mathbf{a}_n$.
-
-**ELBO loss:** For a clean sequence $\mathbf{a}_0$:
+The new policy $\pi_{k+1}$ is obtained by minimising the **forward KL divergence** from the PMD target to the parametric diffusion policy:
 $$
-\mathcal{L}_{\text{ELBO}}(\mathbf{a}_0; \theta) 
-= -\sum_{n=1}^{N} \bar{\alpha}_n \,
-\mathbb{E}_{\mathbf{a}_n \sim q(\cdot|\mathbf{a}_0)}\!\left[
-\sum_{k=0}^{K-1} \mathbb{1}\{a_n^k = m\} \cdot 
-\log \mu_\theta(\mathbf{a}_n, n)_{a_0^k}
-\right]
+\pi_{k+1} \in \arg\min_{\pi_\theta} D_{\text{KL}}\big(\pi_k^{\text{MD}} \big\| \pi_\theta\big)
 $$
 
-Some code:
-
-```Python
-def masked_prediction_loss(
-    model, 
-    diffusion_schedule: Array, 
-    a0: Array, 
-    cond: Array, 
-    rng: PRNGKey, 
-) -> Array:
-  B, _ = a0.shape
-  N = diffusion.num_steps
-  rng, t_rng, noise_rng = jax.random.split(rng, 3)
-  t = jax.random.randint(t_rng, (B,), 0, N)
-
-  keep_prob = diffusion_schedule.state[t][:, None]  # (B, 1)
-  mask_token = diffusion_schedule.dim - 1
-  keep = jr.bernoulli(noise_rng, keep_prob, shape=a0.shape)  # (B, L)
-  a_t = jnp.where(keep, a0, mask_token)
-  mask = ~keep
-
-  logits = model(a_t, t, cond, train=True)
-  log_probs = jax.nn.log_softmax(logits, axis=-1)
-  token_ll = jnp.take_along_axis(log_probs, a0[:, :, None], axis=-1).squeeze(-1)
-  masked_nll = -jnp.where(mask, token_ll, 0.0)
-  return masked_nll.sum(-1)
-```
+Directly minimising this is intractable because $\pi_\theta(\mathbf{a}_0)$ requires integrating over all possible reverse diffusion paths. The key trick of RL-D² is to derive a tractable upper bound using the diffusion ELBO.
 
 ---
 
@@ -305,7 +384,21 @@ w(\mathbf{a}_0)
 {\sum_{\mathbf{a}' \in \hat{\mathcal{A}}} \exp\!\big(\,r(\mathbf{a}')/\lambda\,\big)}
 $$
 
-Some code:
+
+![PM-D^2 execuction chart](/assets/lib/salad_blog/pmd2.png)
+
+
+**How is it approached in the paper:**
+1. Sample a batch of nucleotide sequences from the current diffusion policy.
+2. Compute their rewards $r(\mathbf{a}_0)$ using the predictor.
+3. Reweight each sequence: high-reward sequences get larger weights.
+4. For each sequence, create noised versions $\mathbf{a}_n$ by masking positions according to the schedule.
+5. Train the model to reconstruct the original nucleotides at masked positions, but **focus more on the high-reward sequences** via the weights $w(\mathbf{a}_0)$.
+
+This shifts the generative distribution toward the PMD target without ever needing to backpropagate through the sampling process.
+
+
+If you prefer code,
 
 ```Python
 def fkl_loss(
@@ -336,7 +429,6 @@ def fkl_loss(
   return fkl
 ```
 
-**Interpretation:** The diffusion model is trained as a **generative classifier**. High-reward sequences receive larger weights, so the model focuses its capacity on reconstructing them more accurately. This shifts the policy toward the PMD target without requiring backpropagation through the full reverse diffusion chain.
 
 ## Algorithms 
 
@@ -396,7 +488,7 @@ Each outer round, given current antibody a:
 
 ## Current experimental plan
 
-> CODE placeholder: release within a week.
+> CODE is located here: https://github.com/alexunderch/adios
 {: .prompt-info }
 
 We use a simple (2 layers) diffusion transfomer with additional (and optional) FiLM antibody conditining for preliminary experiments. For now, we mostly stick to ADIOS implementation setting and its current hyperparameters (until I don't become better at biology).
@@ -408,19 +500,108 @@ antigen = "SYSMCTGKFKVVKEIAETQHGTIVIRVQYEGDGSPCKIPFEIMDLEKRHVLGRLITVNPIVTEKDSPVN
 antibody_antitarget = "GRFLVNLQAKKDREAWYYWGPWNKAYWFSDPGMFDPWKQAEQSYFCNANPVCYAEHFMLGPITQKTPMVYHDPEPSKGGCVTVHNNATDYIMPDCYN"
 ```
 
-Current results after `100` optimisation steps:
+### First failed attempts
 
-![Outer loop](/assets/lib/salad_blog/current_results.png)
+Just running a $\text{PM-D}^2$ optimisation yields the following results.
 
-We must notice that although diffusion models are steadily improving, they are yet much worse than plain evolutionaty optimisation with genetice algorithm. It's also unclear if additional conditioning is worth it.
+![Outer loop](/assets/lib/salad_blog/vanilla_sampling.png)
 
-> CURRENT HYPOTHESIS (updated)! Hillclimb's mutation operator guarantees every candidate is a single point-mutation of the current elite. It structurally cannot move far from a known-good starting point, and any gain, once found, is mechanically retained (elitist selection). On the other hand, we haven't got such guarantee in the diffusion models yet, and we hope to achieve or understand it through selective masking or conditioning.
-{: .prompt-info }
+We must notice that although diffusion models are steadily improving, they are yet much worse than plain evolutionaty optimisation with genetice algorithm. It's also unclear if additional conditioning is worth it. Clearly, in agreement with the note above, exploration process stays too stochastic, and it generates low quality data putting the model's success more on luck than on an inductive bias.
+
+### Reverse sampling generalisation
+
+As I have noticed that the model doesn't necessarily have to improve to generate better sequences, I decided to "help the model" to recover good sample, analogous to teacher forcing in autoregressive models.
+
+```Python
+def local_sample_reverse(
+  rng: PRNGKey,
+  model,
+  diffusion_schedule: Array,
+  conditioning: Array,
+  incumbent: Array,
+  num_samples: int
+  antibody_length: int,
+  noise_level: int,
+) -> Array:
+
+  rng, mask_rng = jr.split(rng)
+  keep_prob = diffusion_schedule.state[noise_level]
+  keep = jax.random.bernoulli(mask_rng, keep_prob, shape=(num_samples, antibody_length))
+  mask_token = diffusion_schedule.dim - 1
+  x0 = jnp.where(keep, incumbent[None, :], mask_token)
+
+  def step(carry, n):
+    x, rng = carry
+    rng, model_rng, reveal_rng = jr.split(rng, 3)
+    t = jnp.full((x.shape[0],), n, dtype=jnp.int32)
+    logits = model(x, t, conditioning, train=False)
+    preds = jr.categorical(model_rng, logits, axis=-1)
+    is_masked = x == mask_token
+    state_n    = diffusion_schedule.state[n + 1]
+    state_prev = diffusion_schedule.state[n]
+    p_reveal = jnp.where(
+      state_n < 1.0, (state_prev - state_n) / (1.0 - state_n), 1.0
+    )
+    reveal_now = jax.random.bernoulli(reveal_rng, p_reveal, shape=x.shape) & is_masked
+    return (jnp.where(reveal_now, preds, x), rng), None
+
+  (x_final, _), _ = jax.lax.scan(
+    # not over the full sequence!
+    step, init=(x0, rng), xs=jnp.arange(noise_level), reverse=True
+  )
+  return x_final
+```
+
+You can observe comparison between global baseline sampling and new version in Table below.
+
+|                Aspect               |                                               Global Sampling (Baseline)                                               |                                                                    Local sampling                                                                   |
+|:-----------------------------------:|:----------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------:|
+| Starting state                      | Fully masked ([MASK] × L), every round                                                                                 | Incumbent partially re-masked to `noise_level`; unmasked positions guaranteed equal to incumbent                                                    |
+| Locality guarantee                  | None — only via learned attention to conditioning                                                                      | Structural, by constructionsame mechanism hillclimb's mutation operator relies on                                                                   |
+| Denoising sub-task difficulty       | Fill in all L nucleotide positions jointly from nothing                                                                | Fill in only the re-masked positions (~30-40%), conditioned on the rest being correct                                                               |
+| Relationship to model-collapse risk | Fully self-consuming loop (π_old generates → π_θ trains on that output → resync) with no external grounding each round | Each round's candidates anchored to a position chosen by real evaluation (the incumbent); closer to injecting fresh, grounded data every generation |
+| Inherited failure mode              | Full-space search, in principle immune to single-mutation local optima                                                 | Likely inherits hillclimb's own weakness: small fixed neighbourhoods can't cross valleys needing simultaneous multi-position changes                |
+
+**Consensus mode: local sampling with annealed `noise_level` $n(t)$ , conversing to the global version—a competence curriculum.**
+
+$$ n(t)=  \text{clip}\!\bigl(\, n^*(k(t)),\; 1,\; N-1 \,\bigr), $$
+
+where
+
+$$
+\begin{aligned}
+k(t) = k_{\min} + (k_{\max} - k_{\min})\,\min\!\left(\frac{t}{T_{\text{warm}}},\, 1\right), \\
+n^*(k) \;=\; \min\Bigl\{\, n \in \{1,\dots,N-1\} : \bar{\alpha}_n \leq 1-\frac{k}{L} \,\Bigr\},
+\end{aligned}
+$$
+
+$L$ is the antibody length, $T_{\text{warm}}$ is a number of warmup steps. The schedule controls the sequence edit budget $k(t) \in [k_{\min}; k_{\max}]$, which varies from strong locality (point-wise mutations) to broader exploration. The schedule is implemented in a way that expected Hamming distance to from the incumbent stays as close to the bucket $k(t)$ at each time step $t$.
+
+![Only point wise (local muation)](/assets/lib/salad_blog/local_sampling.png)
+
+As can be observed, if we apply only local mutation, the results become immediately better but 1) still worse than a simple evolutionary baseline; 2) doing only point-wise mutations, we "waste" a lot of generalisation capabilities of the diffusion models. This experiment just shows that one of the things we should care about is controllability of the mutation in the huge design space.
+
+![Schedule (horizon = 10)](/assets/lib/salad_blog/mixed_sampling_horizon10.png)
+
+With an heuristical schedule ($T_\text{warm}$, $k_{\min}$, $k_{\max}$ and fixed horizn $H=10$) the diffusion peforms competitively with the evolution—*what we actually needed.*
+
+| Algorithm          | Verif. perf | Gap (best-mean) |
+|--------------------|-------------|-----------------|
+| Hillclimb          | -82.7 ± 0.5 | -2.5            |
+| Diffusion          | -79.8 ± 0.4 | -3.1            |
+| Diffusion w/ cond. | -81.3 + 0.4 | -1.8            |
+
+Diffusion is clearly better than evolution on validation. However, as I used only 3 seeds, I don't think that we can do a statistically significant prediction. 
+
+Increading the horizon (up to $H=50$) improves the performance.
+
+> Therefore, it's mostly about how you explore in the strategy space when performing reverse sampling with the diffusion model. Current goal is to lessen number of hyperparameters, or decision "knobs", making the noise level schedule likelihood (or ELBO)-dependent.
+{: .prompt-note }
 
 
 ## Current conclusions 
 
-Antibody shaping is a very interesting problem, perfectly isolating major issues of the current agentic and RL systems. Solving it with neural networks would bring us as much value as optimising for a lot of other RL benchmarks. Thus, I currently proposed a method that uses generative models. Currently unsuccessful, being honest, but I think I am on the right way and eager to prove it.
+Antibody shaping is a very interesting problem, perfectly isolating major issues of the current agentic and RL systems. Solving it with neural networks would bring us as much value as optimising for a lot of other RL benchmarks. Thus, I currently proposed a method that uses generative models. Currently not that successful, being honest, but I think I am on the right way and eager to prove it.
 
 ### Special shoutout
 
@@ -437,3 +618,5 @@ goes to Options framework as a way to scalably tackle problems of hierarchical R
 [^2]: The paper also claims `10000x` speedups and other gains. I look through the code for you, don't trust that.
 
 [^3]: Dr. Jacob Foerster may (or may not) share the vision with me: see his recent [paper](https://arxiv.org/abs/2512.05356) for more.
+
+[^4]: $(n-1)^{\text{th}}$ step for the $k^\text{th}$ macro action
