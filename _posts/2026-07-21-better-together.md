@@ -152,26 +152,56 @@ Not really. Collective learning doesn't eliminate the bias-variance tradeoff in 
 
 We test whether a collective of streaming RL agents can overcome the variance floor that traps single-agent learners. For this, we use `CartPole-v1`  as a testbed, but keep the mechanism general: spatial variance reduction via decentralised consensus.
 
-We use a baseline `Stream AC` with `ObGD` (Elsayed et al., 2024).
+We use a baseline `Stream AC` with `ObGD` (Elsayed et al., 2024). Each agent gets its own environment instance.
 
 We test three conditions:
-* **Independent**: 4 agents learn alone, no communication. This is the stream-barrier baseline.
-* **Shared**: 4 agents periodically copy the parameters of a single "leader." This is the centralised oracle: it shows the best possible variance reduction if you could synchronise perfectly.
-* **D-SGD**: 4 agents mix parameters via a ring-topology (because why not) consensus matrix every 100 steps. No leader, no gradient sharing, only local parameter averaging.
+* **Independent**: 8 agents learn alone, no communication. This is the stream-barrier baseline.
+* **Shared**: 8 agents periodically copy the parameters of a single "leader." This is the centralised oracle: it shows the best possible variance reduction if you could synchronise perfectly.
+* **D-SGD**: 8 agents mix parameters via a ring-topology (because why not) consensus matrix every 100 steps. No leader, no gradient sharing, only local parameter averaging.
 
 
-![Preliminary experimental results for Cartpole](/assets/lib/cartpole_dsgd_comparison.png)
+![Preliminary experimental results for Cartpole](/assets/lib/dsgd/cartpole_dsgd_comparison.png)
 
-In our toy experiment, the centralised baseline (Shared) converges to a stable but mediocre policy and never escapes. Independent agents explore more but suffer from sustained high variance, the outcome is not reproducible across seeds. D-SGD shows a distinctive pattern: a burst of cross-seed variance as different agents discover different strategies, followed by a collapse as local consensus. The result is higher peak performance than either extreme, with lower sustained variance than independent learning. The collective doesn't just reduce noise, it may turn exploration into a reproducible, stabilisable process.
+In our toy experiment, the centralised baseline (Shared) converges to a stable but mediocre policy and never escapes. Independent agents explore more but suffer from sustained high variance, the outcome is not reproducible across seeds. D-SGD shows a distinctive pattern: a burst of cross-seed variance as different agents discover different strategies, followed by a collapse as local consensus. 
 
-> We used much less episodes (100 times less than in original paper) and only 3 seeds, so may have to run more, if to convert to some paper-worth results.
+Moreover, we track 4 diagnostics:
+1. consensus error: $\frac{1}{n}\sum_i \|\theta_i - \bar{\theta}\|^2$
+2. pairwise param diversity: mean squared diff across all agent pairs
+3. policy entropy to understand if the agents explore or exploit
+4. cross-agent gradient variance $\text{Var}_i(\|\nabla J_i\|)$, the scalar quantity that matters for update stability.
+
+![Independent baseline](/assets/lib/dsgd/diagnostics_independent.png)
+
+Indepenedt baseline demostrates absense of any emergent consensus between the agents, plus produces high gardient variance.
+
+
+![D-SGD diagnostic](/assets/lib/dsgd/diagnostics_dsgd.png)
+
+The curve has 3 distinct phases:
+
+* *Phase I (steps 0-1,000):* High variance (~9–11). Agents are random, independent, and sampling from completely different policy distributions. The noise is uncorrelated but large.
+* *Phase II (steps 1,000–2,000):* Minimum variance (~6). Agents have partially converged but yet maintain meaningful parameter diversity. They are close enough to share a rough policy landscape, but distinct enough that their gradient noise remains decorrelated. This is the sweet spot, the point where the ant colony actually works.
+* *Phase III (steps 2,000–10,000):* Variance climbs and plateaus at ~17-20. Consensus error has collapsed to near-zero. Agents are effectively clones. They visit the same states, compute the same advantages, and suffer from the same sampling noise. The variance stabilises not because the problem is solved, but because the system has reached a suboptimal fixed point.
+
+**This structure is predicted by the D-SGD variance decomposition!** But the formula assumes agents remain independent samplers of a shared objective. In streaming RL, they do not. As $\theta\to\bar{\theta}$, the local objectives become not just similar but functionally identical. The heterogeneity term $\zeta^2$ collapses, but the "independent noise" assumption breaks too: gradients become correlated, and the effective neighbourhood size collapses into 1.
+
+D-SGD finds a stable point, but it is not the minimum. The minimum was at *Phase II*, and D-SGD "overshot" it partly because the control parameter—mixing matrix $W$—is sensitive to the topology. Once you mix parameters, you inevitably push toward *Phase III*.
+
+![Centralised diagnostic](/assets/lib/dsgd/diagnostics_shared.png)
+
+The centralised "shared" baseline copies one leader's parameters to all followers every 300 steps. It collapses diversity instantly. Consensus error hits zero at step ~500 and never moves. Policy entropy drops faster and stays lower than in D-SGD. D-SGD at least delays the collapse, which is why it outperforms shared in final return. But neither method escapes the fundamental tension: **parameter consensus and gradient decorrelation are in conflict and can't be optimised simultaneously by the method.**
+
+> We used much less episodes (100 times less than in original paper) and only 5 seeds, so may have to run more, if to convert to some paper-worth results. Also, the experiment is a toy within a toy. The gradient variance metric is a proxy (norm variance, not full covariance). But the three-phase structure is consistent across seeds, and the mechanism is general. The point is not that D-SGD fails absolutely; it is that D-SGD finds a stable equilibrium that is not the variance minimum. That is enough to motivate the upgrade.
 {: .prompt-warning }
+
 
 ## Outro
 
 Single-agent streaming RL hits a barrier: variance is too high to converge reliably, and a set of standard fixes— baselines, eligibility traces, self-prediction—either doesnt't help or makes things worse. The uncomfortable truth is that this is that me we might hit a limit for one learner. However, if we deliberately make a problem collective—even a decentralised one with only local observation—the agents can use each other's parameter trajectories as implicit control variates. 
 
-The consensus step in distributed SGD averages independent noise realisations across space, not time. This reduces variance by a factor of neighbourhood size without requiring memory, replay, or explicit gradient sharing. The cost is spatial bias: you need neighbors facing similar subproblems. The gain is breaking the stream barrier that single agents cannot cross.
+The ideal collective would keep agents in *Phase II* indefinitely: diverse enough for decorrelated gradients, coordinated enough to share a global direction. D-SGD cannot solely do this. It has one mechanism: average (mixing) parameters. We need to decouple parameter agreement from update direction agreement. The consensus step in distributed SGD averages independent noise realisations across space, not time. This reduces variance by a factor of neighbourhood size without requiring memory, replay, or explicit gradient sharing. The cost is spatial bias: you need neighbors facing similar subproblems. The gain is breaking the stream barrier that single agents cannot cross.
+
+In Part 2, we replace the parameter-mixing step with a constrined optimisation loop. ObGD provides the local $x$-update. A simple Laplacian consensus provides the $z$-update. The goal is not to make agents identical. The goal is to let them stay in the mode close enough to cooperate, different enough to keep the noise independent.
 
 > If the idea is interesting you may apply different decentralised methods or actually look at the RL convergence guarantees. Cheers!
 {: .prompt-info }
