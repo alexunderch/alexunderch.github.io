@@ -89,7 +89,7 @@ This result concerns coordinate-blind mixing of the form $W\otimes I_d$. It does
 - matrix-weighted gossip;
 - gradient tracking;
 - exact-diffusion methods;
-- personalized decentralised optimization;
+- personalised decentralised optimization;
 - coordinate-adaptive or time-varying communication;
 - and so on...
 
@@ -236,7 +236,7 @@ $$
 \bigcap_{e\ni i}\ker F_{i\to e}.
 $$
 
-However, useful heterogeneous behavior need not be completely invisible. It may instead form a nonconstant global section in $\ker\delta_{\mathcal F}$.
+However, useful heterogeneous behaviour need not be completely invisible. It may instead form a nonconstant global section in $\ker\delta_{\mathcal F}$.
 
 This distinction should be maintained:
 
@@ -534,7 +534,7 @@ Sheaf diffusion cannot stabilise game instabilities lying completely in the glob
 - incentive design;
 - an alternative game-learning dynamic;
 - additional restrictions;
-- centralized or global feedback.
+- centralised or global feedback.
 
 ### Primal–dual strategic dynamics
 
@@ -799,7 +799,7 @@ Supposed to verify Proposition 1 and the public/private covariance consequence.
 
 Freeze regional Q-tables or continuous regional utilities. Compare:
 
-1. exact centralized joint optimization;
+1. exact centralised joint optimization;
 2. undamped Max-Sum;
 3. damped Max-Sum;
 4. consensus ADMM on relaxed regional variables;
@@ -884,7 +884,7 @@ Measure:
 - primal and dual residuals;
 - stability-prediction accuracy;
 - convergence under stragglers;
-- retained heterogeneous behavior.
+- retained heterogeneous behaviour.
 
 ### Phase 6: Strategic learning extensions
 
@@ -971,7 +971,7 @@ For which continuous or relaxed coordination problems can ADMM provide a more st
 
 ### RQ5 — Structural error and gluing obstruction
 
-Under smoothness, strong concavity, or unique-maximizer assumptions, can regional incompatibility or a Hodge residual bound the structural factorization error of a coordination graph?
+Under smoothness, strong concavity, or unique-maximiser assumptions, can regional incompatibility or a Hodge residual bound the structural factorization error of a coordination graph?
 
 ### RQ6 — Primal–dual mode dynamics
 
@@ -996,7 +996,7 @@ After the cooperative optimization case is understood, what changes when regiona
 ## Research hypotheses
 
 - Hodge and loop-gain diagnostics can predict practically relevant instability.
-- Sheaf-valued overlaps reduce structural incompatibility in factorized coordination.
+- Sheaf-valued overlaps reduce structural incompatibility in factorised coordination.
 - ADMM feedback is more stable or diagnosable than damped Max-Sum in an identifiable class of problems.
 - Learned restrictions can stabilize public modes while preserving useful private diversity.
 - Local certificates remain informative under stochasticity and asynchrony.
@@ -1020,7 +1020,7 @@ There was proposed a way of thinking that does not identify consensus, equilibri
 
 The central frontier, therefore, can be stated as:
 
-> Can locally available geometric and dynamical quantities provide useful guarantees about global coordination without collapsing the heterogeneous modes that make decentralized learning valuable?
+> Can locally available geometric and dynamical quantities provide useful guarantees about global coordination without collapsing the heterogeneous modes that make decentralised learning valuable?
 
 ## Some references
 
