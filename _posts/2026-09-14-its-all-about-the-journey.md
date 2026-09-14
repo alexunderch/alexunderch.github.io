@@ -1,6 +1,6 @@
 ---
 title: "Consensus doesn't induce stability"
-date: 2026-09-14 10:00:00 +0000
+date: 2026-09-14 12:00:00 +0000
 categories: [Research, Ideas]
 tags: [decentralised_systems, self_organisation, incentive_design]
 math: true
