@@ -155,7 +155,7 @@ When separately preferred regional actions disagree, the regional solutions do n
 1. **structural error:** the regional factorization is not exact;
 2. **solver error:** loopy message passing does not reach the exact optimum of the factorised problem.
 
-## 2.3 Why cycles matter
+### Why cycles matter
 
 Max-Sum is exact under standard assumptions on trees, but loopy graphs may oscillate or fail to converge. Practical systems therefore introduce message damping:
 
