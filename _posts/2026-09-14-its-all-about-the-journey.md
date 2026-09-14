@@ -1,11 +1,11 @@
-<!-- ---
+---
 title: "Consensus doesn't induce stability"
 date: 2026-09-14 12:00:00 +0000
 categories: [Research, Ideas]
 tags: [decentralised_systems, self_organisation, incentive_design]
 math: true
 description: Sheaf Diffusion, Coordination Graphs, and Local Certificates for Decentralised Learning
---- -->
+---
 
 > **Working thesis.** Literature research shows that sheaf geometry determines which disagreement modes a decentralised coordination mechanism can observe and damp. Local objectives and game dynamics determine whether the remaining modes are stable or desirable. Decentralised optimisation methods like ADMM or VDN adds primal-dual feedback for enforcing compatibility. Hodge decomposition and cycle transport then provide complementary (howevever, fairly deemed incomplete) views of local-to-global inconsistency.
 
