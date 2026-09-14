@@ -1,11 +1,11 @@
----
+<!-- ---
 title: "Consensus doesn't induce stability"
 date: 2026-09-14 12:00:00 +0000
 categories: [Research, Ideas]
 tags: [decentralised_systems, self_organisation, incentive_design]
 math: true
 description: Sheaf Diffusion, Coordination Graphs, and Local Certificates for Decentralised Learning
----
+--- -->
 
 > **Working thesis.** Literature research shows that sheaf geometry determines which disagreement modes a decentralised coordination mechanism can observe and damp. Local objectives and game dynamics determine whether the remaining modes are stable or desirable. Decentralised optimisation methods like ADMM or VDN adds primal-dual feedback for enforcing compatibility. Hodge decomposition and cycle transport then provide complementary (howevever, fairly deemed incomplete) views of local-to-global inconsistency.
 
@@ -1027,7 +1027,7 @@ The central frontier, therefore, can be stated as:
 1. Seely, J., Cupiał, B., and Jones, L. *Learning Multi-Agent Coordination via Sheaf-ADMM*. 2026.
 2. Bodnar, C., Di Giovanni, F., Chamberlain, B., Liò, P., and Bronstein, M. *Neural Sheaf Diffusion: A Topological Perspective on Heterophily and Oversmoothing in GNNs*. NeurIPS 2022.
 3. Hansen, J., and Ghrist, R. *Toward a Spectral Theory of Cellular Sheaves*. Journal of Applied and Computational Topology, 2019.
-4. [Authors]. *Coordination Graphs for Constrained Multi-Agent Reinforcement Learning*. arXiv:2606.02337, 2026.
+4. Amaya-Corredor, Santiago, Miguel Calvo-Fullana, and Anders Jonsson. "Coordination Graphs for Constrained Multi-Agent Reinforcement Learning." arXiv preprint arXiv:2606.02337 (2026).
 5. Guestrin, C., Koller, D., and Parr, R. *Multiagent Planning with Factored MDPs*. NeurIPS 2001.
 6. Balduzzi, D., et al. *The Mechanics of n-Player Differentiable Games*. ICML 2018.
 7. Candogan, O., Menache, I., Ozdaglar, A., and Parrilo, P. *Flows and Decompositions of Games: Harmonic and Potential Games*. Mathematics of Operations Research, 2011.
